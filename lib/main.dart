@@ -9,7 +9,11 @@ class WishItem {
   final String title;
   final String content;
 }
-
+class Arguments {
+  final List<WishItem> item;
+  final ItemAddCallback itemAdder;
+  Arguments(this.item, this.itemAdder);
+}
 void main() {
   runApp(MyApp());
 }
@@ -32,11 +36,25 @@ class MyApp extends StatelessWidget {
     );
   }
 }
+class Menu extends StatefulWidget {
+  Menu({Key key, this.items}) : super(key: key);
+  final List<WishItem> items;
+  @override
+  _MenuState createState() => _MenuState();
+}
 
-class Menu extends StatelessWidget{
+class _MenuState extends State<Menu> {
+  List<WishItem> items = List<WishItem>();
+  void itemAdder(WishItem i){
+    setState(() {
+      items.add(i);
+    });
+  }
   @override
   Widget build(BuildContext context) {
-    debugPrint("Menu");
+    int i = items.length;
+
+    debugPrint("Menu:$i");
     return Scaffold(
         appBar: AppBar(
           title: Text("Lover Space"),
@@ -46,7 +64,9 @@ class Menu extends StatelessWidget{
             Card(
               child: ListTile(title: Text('我们的愿望清单'),
                 onTap: (){
-                  Navigator.pushNamed(context, '/wishlist');
+                  Navigator.pushNamed(context,
+                      '/wishlist',
+                  arguments: Arguments(items,itemAdder) );
                 },
               ),
             ),
@@ -56,29 +76,21 @@ class Menu extends StatelessWidget{
   }
 }
 
+
+
+
 class WishList extends StatefulWidget {
-  WishList({Key key, this.items}) : super(key: key);
-
-  final List<WishItem> items;
   @override
-
   _WishListState createState() => _WishListState();
 }
 
 class _WishListState extends State<WishList> {
-
-  List<WishItem> items = List<WishItem>();
-
-
-  void itemAdder(WishItem i){
-    setState(() {
-        items.add(i);
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
-    debugPrint("rebuild");
+    debugPrint("Inside wishlist");
+    final Arguments args = ModalRoute.of(context).settings.arguments;
+    final List<WishItem> items = args.item;
+    final ItemAddCallback itemAdder = args.itemAdder;
     int i = items.length;
     debugPrint("$i");
     return Scaffold(
@@ -89,26 +101,32 @@ class _WishListState extends State<WishList> {
         padding: const EdgeInsets.all(32),
         children: items.map((WishItem i) {
           return ItemLists(
-                 wishitem: i,
-                 itemAdder:itemAdder,
-                  );
-           }).toList(),
+            wishitem: i,
+            itemAdder:itemAdder,
+          );
+        }).toList(),
 
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: (){
-          Navigator.pushNamed(context,
-              '/inputtext',
-              arguments: itemAdder);
-        },
-        label: Text("新加愿望"),
-        icon: Icon(Icons.add),
-        backgroundColor: Colors.pink
+          onPressed: ()async{
+            await Navigator.pushNamed(context,
+                '/inputtext',
+                arguments: itemAdder);
+            setState(() {
+
+            });
+          },
+          label: Text("新加愿望"),
+          icon: Icon(Icons.add),
+          backgroundColor: Colors.pink
 
       ),
     );
   }
 }
+
+
+
 
 class ItemLists extends StatelessWidget{
   ItemLists({this.wishitem,this.itemAdder})
