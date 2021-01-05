@@ -138,6 +138,21 @@ class ItemLists extends StatelessWidget{
   Widget build(BuildContext context) {
     return ListTile(
       onTap: () {
+        Navigator.push(context,
+        MaterialPageRoute(builder: (context)=>AlertDialog(
+            title: Text(wishitem.title),
+          content: SingleChildScrollView(
+            child: Text(wishitem.content),
+          ),
+          actions: <Widget>[
+            TextButton(
+                onPressed: (){
+                  Navigator.pop(context);
+                },
+                child: Text("返回"))
+          ],
+        )
+        ));
 
       },
       title: Text(wishitem.title),
